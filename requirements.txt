@@ -1,0 +1,31 @@
+# ============================================
+# Research Paper Summarizer — Python Dependencies
+# ============================================
+
+# --- Core ---
+python-dotenv>=1.0.0
+requests>=2.31.0
+httpx>=0.27.0
+
+# --- PDF Parsing (CPU-only, no GPU needed) ---
+pymupdf4llm>=0.0.17
+pymupdf>=1.25.0
+
+# --- LLM Clients (OpenAI-compatible) ---
+openai>=1.40.0
+
+# --- Verification (Cross-Encoder, runs on CPU) ---
+sentence-transformers>=3.0.0
+torch>=2.0.0
+
+# --- Email ---
+# Uses built-in smtplib + email.mime (no extra deps)
+jinja2>=3.1.0
+
+# --- Database ---
+supabase>=2.5.0
+
+# --- Utilities ---
+beautifulsoup4>=4.12.0
+lxml>=5.0.0
+python-dateutil>=2.8.0
