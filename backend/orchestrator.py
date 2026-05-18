@@ -101,7 +101,7 @@ class PipelineOrchestrator:
             logger.info(f"{'='*60}")
 
             try:
-                result = self._process_topic(topic_name, date_str, skip_db=bool(target_email))
+                result = self._process_topic(topic_name, date_str, skip_db=bool(target_email), log_id=log_id)
                 if result:
                     results.append(result)
             except Exception as e:
@@ -123,13 +123,15 @@ class PipelineOrchestrator:
 
         return results
 
-    def _process_topic(self, topic_name: str, date_str: str, skip_db: bool = False) -> Optional[dict]:
+    def _process_topic(self, topic_name: str, date_str: str, skip_db: bool = False, log_id: Optional[str] = None) -> Optional[dict]:
         """Process a single topic through the full pipeline."""
         # 1. Expand topic
         topic = expand_topic(topic_name)
         logger.info(f"Expanded topic '{topic.name}': {len(topic.keywords)} keywords")
 
         # 2. Discover papers
+        if self._db and log_id:
+            self._db.update_delivery_log(log_id, "fetching_papers")
         candidates = fetch_papers(self.config.paper_api, topic, max_papers=10)
         if not candidates:
             logger.warning(f"No papers found for '{topic_name}'. Skipping.")
@@ -146,6 +148,9 @@ class PipelineOrchestrator:
         paper_data = []
         pdf_paths = []
         num_papers = len(selected)
+
+        if self._db and log_id:
+            self._db.update_delivery_log(log_id, "getting_summary")
 
         for idx, paper in enumerate(selected):
             logger.info(f"Processing paper {idx+1}/{num_papers}: {paper.title}")
@@ -218,6 +223,9 @@ class PipelineOrchestrator:
             return None
 
         # 8. Build combined digest
+        if self._db and log_id:
+            self._db.update_delivery_log(log_id, "crafting_mail")
+            
         topic_slug = re.sub(r'[^a-zA-Z0-9]', '_', topic.name)[:30]
         digest_header = (
             f"# 📚 Research Digest: {topic.name}\n"
@@ -309,6 +317,9 @@ class PipelineOrchestrator:
                 })
                 total_papers += digest.get("paper_count", 0)
                 total_words += digest.get("word_count", 0)
+
+            if self._db and log_id:
+                self._db.update_delivery_log(log_id, "crafting_mail")
 
             html = email_templates.render_weekly(
                 topic=topic_name,
@@ -402,6 +413,9 @@ class PipelineOrchestrator:
                         self._md_to_html(d["markdown_content"]) for d in current_week
                     ),
                 })
+
+            if self._db and log_id:
+                self._db.update_delivery_log(log_id, "crafting_mail")
 
             html = email_templates.render_monthly(
                 topic=topic_name,

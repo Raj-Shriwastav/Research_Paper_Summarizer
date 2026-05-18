@@ -21,12 +21,12 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { cadence, target } = await request.json(); // cadence: 'daily' | 'weekly' | 'monthly', target: 'self' | 'all'
+    const { cadence, target } = await request.json(); // cadence: 'daily' | 'weekly' | 'monthly', target: 'all' | '<email>'
     
-    // Determine the target email if 'self'. If 'all', we don't pass --target-email so the CLI uses DB.
+    // Determine the target email. If 'all', we don't pass --target-email so the CLI uses DB.
     let targetEmailArg: string | null = null;
-    if (target === 'self') {
-      targetEmailArg = user.email!;
+    if (target !== 'all') {
+      targetEmailArg = target;
     }
 
     // Determine the path to the python CLI

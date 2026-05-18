@@ -27,6 +27,7 @@ export default function AdminDashboard() {
   const [activeLogId, setActiveLogId] = useState<string | null>(null);
   const [message, setMessage] = useState<{type: 'success'|'error'|'info', text: string} | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [testEmail, setTestEmail] = useState('');
 
   useEffect(() => {
     fetchUsers();
@@ -62,19 +63,33 @@ export default function AdminDashboard() {
           setMessage({ type: 'error', text: `Failed: ${data.error_message || 'Unknown error'}` });
           setDispatching(null);
           setActiveLogId(null);
+        } else {
+          // Progress updates
+          let progressText = 'Processing in background...';
+          if (data.status === 'fetching_papers') progressText = 'Fetching latest papers from arXiv...';
+          else if (data.status === 'getting_summary') progressText = 'Summarizing papers...';
+          else if (data.status === 'crafting_mail') progressText = 'Crafting email and formatting...';
+          
+          setMessage({ type: 'info', text: `⏳ ${progressText}` });
         }
       } catch (e) {
         console.error('Polling error', e);
       }
-    }, 60000); // Poll every 60 seconds (1 minute)
+    }, 5000); // Poll every 5 seconds
 
     return () => clearInterval(interval);
   }, [activeLogId]);
 
-  const handleDispatch = async (cadence: string, target: 'self' | 'all') => {
-    if (target === 'all' && !confirm(`Are you sure you want to trigger a ${cadence} dispatch to ALL subscribers?`)) return;
+  const handleDispatch = async (cadence: string, targetType: 'test' | 'all') => {
+    if (targetType === 'all' && !confirm(`Are you sure you want to trigger a ${cadence} dispatch to ALL subscribers?`)) return;
     
-    setDispatching(`${cadence}-${target}`);
+    let target = targetType === 'all' ? 'all' : testEmail;
+    if (targetType === 'test' && !target) {
+       setMessage({ type: 'error', text: 'Please enter a test email address.'});
+       return;
+    }
+    
+    setDispatching(`${cadence}-${targetType}`);
     setMessage(null);
     try {
       const res = await fetch('/api/admin/dispatch', {
@@ -85,7 +100,7 @@ export default function AdminDashboard() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Dispatch failed');
       
-      setMessage({ type: 'info', text: `⏳ Background generation for ${cadence} started. Scraping and summarizing papers...` });
+      setMessage({ type: 'info', text: `⏳ Background generation for ${cadence} started. Initializing...` });
       if (data.log_id) {
         setActiveLogId(data.log_id);
       } else {
@@ -158,14 +173,23 @@ export default function AdminDashboard() {
             <div key={cad} className="glass-panel p-6 rounded-2xl border border-white/5 flex flex-col">
               <h3 className="text-lg font-semibold text-white capitalize mb-4">{cad} Pipeline</h3>
               <div className="mt-auto space-y-3">
-                <button 
-                  onClick={() => handleDispatch(cad, 'self')}
-                  disabled={dispatching !== null}
-                  className="w-full py-2 bg-white/5 hover:bg-white/10 text-white rounded-xl text-sm font-medium transition-colors border border-white/10 disabled:opacity-50 flex justify-center items-center gap-2"
-                >
-                  {dispatching === `${cad}-self` ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"/> : <Send className="w-4 h-4" />}
-                  Send Test (Self)
-                </button>
+                <div className="flex gap-2">
+                  <input
+                    type="email"
+                    placeholder="Enter test email..."
+                    value={testEmail}
+                    onChange={(e) => setTestEmail(e.target.value)}
+                    className="flex-1 bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-primary/50"
+                  />
+                  <button 
+                    onClick={() => handleDispatch(cad, 'test')}
+                    disabled={dispatching !== null}
+                    className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-xl text-sm font-medium transition-colors border border-white/10 disabled:opacity-50 flex justify-center items-center gap-2"
+                  >
+                    {dispatching === `${cad}-test` ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"/> : <Send className="w-4 h-4" />}
+                    Test
+                  </button>
+                </div>
                 <button 
                   onClick={() => handleDispatch(cad, 'all')}
                   disabled={dispatching !== null}
