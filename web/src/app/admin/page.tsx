@@ -65,10 +65,10 @@ export default function AdminDashboard() {
           setActiveLogId(null);
         } else {
           // Progress updates
-          let progressText = 'Processing in background...';
+          let progressText = 'Initializing pipeline and loading AI models...';
           if (data.status === 'fetching_papers') progressText = 'Fetching latest papers from arXiv...';
-          else if (data.status === 'getting_summary') progressText = 'Summarizing papers...';
-          else if (data.status === 'crafting_mail') progressText = 'Crafting email and formatting...';
+          else if (data.status === 'getting_summary') progressText = 'Extracting data and summarizing papers with AI...';
+          else if (data.status === 'crafting_mail') progressText = 'Creating digest report and sending the mail...';
           
           setMessage({ type: 'info', text: `⏳ ${progressText}` });
         }
