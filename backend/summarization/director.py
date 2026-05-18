@@ -13,7 +13,7 @@ class SummaryConstraints:
     instruction: str
 
 class DirectorAgent:
-    def __init__(self, target_min_minutes: int = 15, target_max_minutes: int = 25, words_per_minute: int = 220):
+    def __init__(self, target_min_minutes: int = 5, target_max_minutes: int = 8, words_per_minute: int = 220):
         self.min_words = target_min_minutes * words_per_minute
         self.max_words = target_max_minutes * words_per_minute
         self.target_total_words = (self.min_words + self.max_words) // 2

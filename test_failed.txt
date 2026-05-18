@@ -19,3 +19,9 @@ Details: Link text: OpenAI’s RLHF Overview
 [2026-05-18 11:13:17] [BROKEN LINK REMOVED] Removed dead or hallucinated link: https://en.wikipedia.org/wiki/Partially_Observable_Markov_Decision_Process
 Details: Link text: Partially Observable Markov Decision Process (POMDP)
 ------------------------------------------------------------
+[2026-05-18 13:15:49] [BROKEN LINK REMOVED] Removed dead or hallucinated link: https://openai.com/research/reinforcement-learning-from-human-preference
+Details: Link text: Reinforcement Learning from Human Feedback (RLHF)
+------------------------------------------------------------
+[2026-05-18 13:19:26] [BROKEN LINK REMOVED] Removed dead or hallucinated link: https://openai.com/index/learning-from-human-feedback/
+Details: Link text: Reinforcement Learning from Human Feedback (RLHF)
+------------------------------------------------------------

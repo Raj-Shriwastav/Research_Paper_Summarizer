@@ -3,6 +3,7 @@ import { createClient as createAdminClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 import { spawn } from 'child_process';
 import path from 'path';
+import fs from 'fs';
 
 export async function POST(request: Request) {
   const supabase = await createServerClient();
@@ -60,11 +61,26 @@ export async function POST(request: Request) {
       args.push('--log-id', logEntry.id);
     }
 
-    // Spawn the background process — stdout/stderr inherit so logs appear in the Next.js terminal
+    // Ensure logs directory exists
+    const logsDir = path.resolve(process.cwd(), '../logs');
+    if (!fs.existsSync(logsDir)) {
+      fs.mkdirSync(logsDir, { recursive: true });
+    }
+
+    let out, err;
+    if (logEntry?.id) {
+      const logFilePath = path.join(logsDir, `${logEntry.id}.log`);
+      // Create initial log file
+      fs.writeFileSync(logFilePath, `[System] Background task initialized. Log ID: ${logEntry.id}\n`);
+      out = fs.openSync(logFilePath, 'a');
+      err = fs.openSync(logFilePath, 'a');
+    }
+
+    // Spawn the background process
     const cwdPath = path.resolve(process.cwd(), '../'); // Run from root to access backend/ properly
     const pyProcess = spawn('python', args, {
       detached: true,
-      stdio: ['ignore', 'inherit', 'inherit'],
+      stdio: ['ignore', out || 'inherit', err || 'inherit'],
       cwd: cwdPath,
       windowsHide: true,
     });

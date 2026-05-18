@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Users, Send, Settings, Trash2, Edit2, Check, X, Shield, Activity, Search } from 'lucide-react';
 
@@ -28,6 +28,14 @@ export default function AdminDashboard() {
   const [message, setMessage] = useState<{type: 'success'|'error'|'info', text: string} | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [testEmail, setTestEmail] = useState('');
+  const [pipelineLogs, setPipelineLogs] = useState<string>('');
+  const logsEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (logsEndRef.current) {
+      logsEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [pipelineLogs]);
 
   useEffect(() => {
     fetchUsers();
@@ -72,6 +80,19 @@ export default function AdminDashboard() {
           
           setMessage({ type: 'info', text: `⏳ ${progressText}` });
         }
+
+        // Fetch Logs
+        try {
+          const logsRes = await fetch(`/api/admin/dispatch/logs?id=${activeLogId}`);
+          if (logsRes.ok) {
+            const logsData = await logsRes.json();
+            if (logsData.logs) {
+              setPipelineLogs(logsData.logs);
+            }
+          }
+        } catch (err) {
+          console.error('Failed to fetch logs', err);
+        }
       } catch (e) {
         console.error('Polling error', e);
       }
@@ -101,6 +122,7 @@ export default function AdminDashboard() {
       if (!res.ok) throw new Error(data.error || 'Dispatch failed');
       
       setMessage({ type: 'info', text: `⏳ Background generation for ${cadence} started. Initializing...` });
+      setPipelineLogs(''); // Clear previous logs
       if (data.log_id) {
         setActiveLogId(data.log_id);
       } else {
@@ -205,7 +227,7 @@ export default function AdminDashboard() {
       </section>
 
       {/* User Roster */}
-      <section>
+      <section className="mb-12">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-white">User Roster</h2>
           <div className="relative w-64">
@@ -276,6 +298,27 @@ export default function AdminDashboard() {
           </div>
         </div>
       </section>
+
+      {/* Terminal / Logs Viewer */}
+      {(activeLogId || pipelineLogs) && (
+        <section className="animate-fade-in">
+          <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+            <Activity className="w-5 h-5 text-primary" /> Live Background Pipeline Logs
+          </h2>
+          <div className="bg-[#0D1117] border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+            <div className="flex items-center px-4 py-2 bg-white/[0.03] border-b border-white/5 gap-2">
+              <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
+              <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+              <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
+              <span className="ml-2 text-xs text-gray-500 font-mono">system@research-summarizer:~$</span>
+            </div>
+            <div className="p-4 h-80 overflow-y-auto font-mono text-xs sm:text-sm text-gray-300 leading-relaxed custom-scrollbar">
+              <pre className="whitespace-pre-wrap">{pipelineLogs || 'Initializing logs...'}</pre>
+              <div ref={logsEndRef} />
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
