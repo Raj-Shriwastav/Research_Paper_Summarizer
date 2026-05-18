@@ -128,15 +128,23 @@ class Summarizer:
 
         # ── Step 3: Generate A/B/C summary for each item ─────────────
         summary_items = []
+        
+        # Divide target words across the extracted items so the TOTAL per paper matches the budget!
+        num_items = max(1, len(raw_items))
+        item_target_words = max(150, constraints.target_words // num_items)
+        
         for i, item in enumerate(raw_items):
             logger.info(
                 f"Step 3: Summarizing item {i+1}/{len(raw_items)}: "
                 f"{item.get('title', 'Unknown')}"
             )
+            
+            item_instruction = f"IMPORTANT: Your summary for this specific item MUST be around {item_target_words} words."
+            
             summary_item = self._summarize_item(
                 item, paper_title, paper_content, parsed_paper,
-                length_instruction=constraints.instruction,
-                target_words=constraints.target_words,
+                length_instruction=item_instruction,
+                target_words=item_target_words,
             )
             if summary_item:
                 summary_items.append(summary_item)

@@ -25,3 +25,28 @@ Details: Link text: Reinforcement Learning from Human Feedback (RLHF)
 [2026-05-18 13:19:26] [BROKEN LINK REMOVED] Removed dead or hallucinated link: https://openai.com/index/learning-from-human-feedback/
 Details: Link text: Reinforcement Learning from Human Feedback (RLHF)
 ------------------------------------------------------------
+[2026-05-18 13:34:08] [BROKEN LINK REMOVED] Removed dead or hallucinated link: https://en.wikipedia.org/wiki/Partially_Observable_Markov_Decision_Process
+Details: Link text: Partially Observable Markov Decision Process (POMDP)
+------------------------------------------------------------
+[2026-05-18 13:34:08] [BROKEN LINK REMOVED] Removed dead or hallucinated link: https://en.wikipedia.org/wiki/Partially_Observable_Markov_Decision_Process
+Details: Link text: POMDP
+------------------------------------------------------------
+[2026-05-18 13:34:08] [BROKEN LINK REMOVED] Removed dead or hallucinated link: https://en.wikipedia.org/wiki/Partially_Observable_Markov_Decision_Process
+Details: Link text: Partially Observable Markov Decision Process (POMDP)
+------------------------------------------------------------
+[2026-05-18 13:34:08] [BROKEN LINK REMOVED] Removed dead or hallucinated link: https://en
+
+---
+
+### 📝 Combined Summary
+2.  `### ⭐
+
+### ⭐ Key Takeaway — MAKE NOTE OF THIS
+3.  `### 🔗
+
+### 🔗 Useful Links
+Insightful, engaging, expert, and professional.
+
+    *   *Problem:* RLHF assumes one "average" teacher. Real-world data is heterogeneous (experts vs. crowdworkers
+Details: Link text: RLHF
+------------------------------------------------------------
