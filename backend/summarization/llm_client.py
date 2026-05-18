@@ -1,7 +1,7 @@
 """
 LLM Client — Unified client with provider fallback chain.
 
-Tries Google AI Studio → Groq → Cloudflare → OpenRouter in sequence.
+Tries Google AI Studio → Groq → HuggingFace in sequence.
 All use OpenAI-compatible API format, so switching is seamless.
 """
 
@@ -20,8 +20,7 @@ logger = logging.getLogger(__name__)
 # Models that do NOT support response_format=json_object.
 # For these, we rely on prompt engineering to get JSON output.
 _NO_JSON_MODE_MODELS = {
-    "openrouter/free", # Since it routes to random models, we shouldn't force JSON format
-    "poolside/laguna-xs.2:free",
+    "meta-llama/Llama-3.3-70B-Instruct",  # Some HF models may not support json_mode
 }
 
 
@@ -40,7 +39,7 @@ class LLMClient:
     """
     Unified LLM client with automatic provider fallback.
 
-    Provider priority: DeepSeek → Google AI Studio → Groq → Cloudflare → OpenRouter
+    Provider priority: Google AI Studio → Groq → HuggingFace
     All use OpenAI-compatible API, so the interface is identical.
     """
 
@@ -67,8 +66,7 @@ class LLMClient:
         if config.groq_api_key:
             groq_models =[
                 "openai/gpt-oss-120b",
-                "qwen/qwen3-32b",
-                "openai/gpt-oss-20b"
+                "qwen/qwen3-32b"
             ]
             for model in groq_models:
                 self.providers.append(LLMProvider(
@@ -77,28 +75,26 @@ class LLMClient:
                     base_url=config.groq_base_url,
                     model=model,
                 ))
-            
-        # 3. OpenRouter model hierarchy
-        if config.openrouter_api_key:
-            openrouter_models =[
-                "deepseek/deepseek-v4-flash:free",
-                "openai/gpt-oss-120b:free",
-                "nousresearch/hermes-3-llama-3.1-405b:free",
-                "meta-llama/llama-3.3-70b-instruct:free",
-                "google/gemma-4-31b-it:free",
-                "qwen/qwen3-next-80b-a3b-instruct:free",
-                "google/gemma-4-26b-a4b-it:free",
-                "meta-llama/llama-3.2-3b-instruct:free"
+        
+        '''
+        # 3. HuggingFace Inference API (serverless, free tier)
+        if config.huggingface_api_key:
+            hf_models = [
+                "Qwen/Qwen3-235B-A22B",
+                "deepseek-ai/DeepSeek-V3-0324",
+                "meta-llama/Llama-3.3-70B-Instruct",
+                "mistralai/Mistral-Small-3.1-24B-Instruct-2503",
+                "Qwen/Qwen2.5-72B-Instruct"
             ]
-            for model in openrouter_models:
+            for model in hf_models:
                 self.providers.append(LLMProvider(
-                    name=f"OpenRouter ({model})",
-                    api_key=config.openrouter_api_key,
-                    base_url=config.openrouter_base_url,
+                    name=f"HuggingFace ({model.split('/')[-1]})",
+                    api_key=config.huggingface_api_key,
+                    base_url=config.huggingface_base_url,
                     model=model,
                 ))
-
-
+        '''   
+        
         if not self.providers:
             raise ValueError(
                 "No LLM API keys configured! Please add at least one "

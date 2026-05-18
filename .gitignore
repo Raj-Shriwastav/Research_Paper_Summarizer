@@ -221,3 +221,7 @@ __marimo__/
 design_responses.md
 implementation_plan.md
 task.md
+# Generated digests
+digests/
+data/
+test_failed.txt

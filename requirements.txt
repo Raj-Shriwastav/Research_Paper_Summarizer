@@ -21,6 +21,7 @@ torch>=2.0.0
 # --- Email ---
 # Uses built-in smtplib + email.mime (no extra deps)
 jinja2>=3.1.0
+markdown>=3.5.0
 
 # --- Database ---
 supabase>=2.5.0

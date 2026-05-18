@@ -15,8 +15,8 @@ load_dotenv(_env_path)
 @dataclass
 class LLMConfig:
     """LLM provider configuration with fallback chain."""
-    openrouter_api_key: str = ""
-    openrouter_base_url: str = "https://openrouter.ai/api/v1"
+    huggingface_api_key: str = ""
+    huggingface_base_url: str = "https://router.huggingface.co/v1"
 
     groq_api_key: str = ""
     groq_base_url: str = "https://api.groq.com/openai/v1"
@@ -26,22 +26,19 @@ class LLMConfig:
     google_base_url: str = "https://generativelanguage.googleapis.com/v1beta/openai/"
     google_model: str = "gemini-2.5-flash"
 
-    deepseek_api_key: str = ""
-    deepseek_base_url: str = "https://api.deepseek.com/v1"
-    deepseek_model: str = "deepseek-chat"
-
-    cloudflare_api_key: str = ""
-    cloudflare_account_id: str = ""
-    cloudflare_model: str = "@cf/meta/llama-3.1-8b-instruct"
-
 
 @dataclass
 class EmailConfig:
-    """Gmail SMTP configuration."""
-    gmail_address: str = ""
-    gmail_app_password: str = ""
-    smtp_server: str = "smtp.gmail.com"
+    """SMTP configuration."""
+    smtp_user: str = ""
+    smtp_password: str = ""
+    smtp_server: str = ""
     smtp_port: int = 587
+    recipient_emails: list = None
+
+    def __post_init__(self):
+        if self.recipient_emails is None:
+            self.recipient_emails = []
 
 
 @dataclass
@@ -84,16 +81,18 @@ def load_config() -> AppConfig:
     """Load configuration from environment variables."""
     config = AppConfig(
         llm=LLMConfig(
-            openrouter_api_key=os.getenv("OPENROUTER_API_KEY", ""),
+            huggingface_api_key=os.getenv("HUGGINGFACE_API_KEY", ""),
             groq_api_key=os.getenv("GROQ_API_KEY", ""),
             google_api_key=os.getenv("GOOGLE_AI_API_KEY", ""),
-            deepseek_api_key=os.getenv("DEEPSEEK_API_KEY", ""),
-            cloudflare_api_key=os.getenv("CLOUDFLARE_API_KEY", ""),
-            cloudflare_account_id=os.getenv("CLOUDFLARE_ACCOUNT_ID", ""),
         ),
         email=EmailConfig(
-            gmail_address=os.getenv("GMAIL_ADDRESS", ""),
-            gmail_app_password=os.getenv("GMAIL_APP_PASSWORD", ""),
+            smtp_user=os.getenv("SMTP_USER", ""),
+            smtp_password=os.getenv("SMTP_PASSWORD", ""),
+            smtp_server=os.getenv("SMTP_HOST", "smtp.gmail.com"),
+            smtp_port=int(os.getenv("SMTP_PORT", "587")),
+            recipient_emails=[
+                e.strip() for e in os.getenv("RECIPIENT_EMAILS", "").split(",") if e.strip()
+            ],
         ),
         supabase=SupabaseConfig(
             url=os.getenv("SUPABASE_URL", ""),

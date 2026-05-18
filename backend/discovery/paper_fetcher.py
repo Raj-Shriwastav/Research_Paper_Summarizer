@@ -214,7 +214,7 @@ class ArxivFetcher:
                 headers={
                     "User-Agent": (
                         "ResearchPaperSummarizer/1.0 "
-                        "(OAI-PMH harvester; contact: alokprasadshriwastava@gmail.com)"
+                        "(OAI-PMH harvester; contact: raazof5@gmail.com)"
                     )
                 },
             )

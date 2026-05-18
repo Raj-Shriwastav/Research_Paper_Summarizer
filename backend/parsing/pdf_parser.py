@@ -59,7 +59,7 @@ def download_pdf(pdf_url: str, cache_dir: str) -> Optional[str]:
             timeout=60,
             headers={
                 "User-Agent": "ResearchPaperSummarizer/1.0 "
-                              "(contact: alokprasadshriwastava@gmail.com)"
+                              "(contact: raazof5@gmail.com)"
             },
         )
         resp.raise_for_status()
