@@ -29,6 +29,9 @@ export default function OnboardingPage() {
     setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
+      // Ensure user profile exists (service role bypasses RLS)
+      await fetch('/api/profile/ensure', { method: 'POST' });
+
       // Save preferences
       await supabase.from('user_preferences').upsert({
         user_id: user.id,

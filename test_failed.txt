@@ -7,3 +7,15 @@ Details: Link text: Decentralized Partially Observable Markov Decision Processes
 [2026-05-17 23:26:25] [BROKEN LINK REMOVED] Removed dead or hallucinated link: https://en.wikipedia.org/wiki/Partially_Observable_Markov_Decision_Process
 Details: Link text: Partially Observable Markov Decision Process (POMDP)
 ------------------------------------------------------------
+[2026-05-18 11:13:17] [BROKEN LINK REMOVED] Removed dead or hallucinated link: https://en.wikipedia.org/wiki/Partially_Observable_Markov_Decision_Process
+Details: Link text: Partially Observable Markov Decision Processes (POMDPs)
+------------------------------------------------------------
+[2026-05-18 11:13:17] [BROKEN LINK REMOVED] Removed dead or hallucinated link: https://github.com/pomdp/pomcpow
+Details: Link text: POMCPOW GitHub
+------------------------------------------------------------
+[2026-05-18 11:13:17] [BROKEN LINK REMOVED] Removed dead or hallucinated link: https://openai.com/research/reinforcement-learning-from-human-feedback
+Details: Link text: OpenAI’s RLHF Overview
+------------------------------------------------------------
+[2026-05-18 11:13:17] [BROKEN LINK REMOVED] Removed dead or hallucinated link: https://en.wikipedia.org/wiki/Partially_Observable_Markov_Decision_Process
+Details: Link text: Partially Observable Markov Decision Process (POMDP)
+------------------------------------------------------------

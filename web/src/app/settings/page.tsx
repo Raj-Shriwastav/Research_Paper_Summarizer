@@ -38,20 +38,24 @@ export default function SettingsPage() {
           email_enabled: data.email_enabled ?? true,
         });
       } else {
-        // Ensure user exists in users table FIRST (foreign key requirement)
-        await supabase.from('users').upsert({
-          id: user.id,
-          email: user.email,
-        }, { onConflict: 'id' });
+        // Ensure user & preferences exist via server-side API (bypasses RLS)
+        await fetch('/api/profile/ensure', { method: 'POST' });
 
-        // Then insert default preferences
-        await supabase.from('user_preferences').upsert({
-          user_id: user.id,
-          topics: ['Artificial Intelligence'],
-          cadence: ['daily', 'weekly', 'monthly'],
-          max_papers_per_digest: 2,
-          email_enabled: true,
-        }, { onConflict: 'user_id' });
+        // Re-fetch preferences after creation
+        const { data: newData } = await supabase
+          .from('user_preferences')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+
+        if (newData) {
+          setPreferences({
+            topics: newData.topics || ['Artificial Intelligence'],
+            cadence: newData.cadence || ['daily'],
+            max_papers_per_digest: newData.max_papers_per_digest || 2,
+            email_enabled: newData.email_enabled ?? true,
+          });
+        }
       }
       setLoading(false);
     }

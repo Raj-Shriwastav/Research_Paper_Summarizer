@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
@@ -17,21 +18,25 @@ export async function GET(request: Request) {
       let nextRoute = next;
 
       if (user) {
+        // Use service role to bypass RLS — this is a trusted server route
+        const adminSupabase = createAdminClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_KEY!
+        );
+
         // Auto-create or update profile
         const role = user.email === 'raazof5@gmail.com' ? 'admin' : 'user';
         
         // Get display name from user metadata (set during signUp or by Google)
         const metadataName = user.user_metadata?.display_name || user.user_metadata?.full_name || user.user_metadata?.name;
         
-        const { data: existingUser } = await supabase
+        const { data: existingUser } = await adminSupabase
           .from('users')
           .select('onboarding_completed, display_name')
           .eq('id', user.id)
           .single();
 
         // Determine what display name to save
-        // 1. If metadata has a name (from signUp data or Google), use it for new users
-        // 2. Otherwise keep existing, or fallback to email prefix
         let finalName = existingUser?.display_name;
         if (metadataName && !existingUser?.display_name) {
           finalName = metadataName;
@@ -39,7 +44,7 @@ export async function GET(request: Request) {
           finalName = user.email?.split('@')[0] || 'Anonymous';
         }
 
-        await supabase.from('users').upsert({
+        await adminSupabase.from('users').upsert({
           id: user.id,
           email: user.email,
           delivery_email: user.email,
@@ -51,8 +56,8 @@ export async function GET(request: Request) {
 
         // If it's a new user, they won't have onboarding_completed
         if (!existingUser || !existingUser.onboarding_completed) {
-          // Add default preferences if missing
-          await supabase.from('user_preferences').upsert({
+          // Add default preferences
+          await adminSupabase.from('user_preferences').upsert({
             user_id: user.id,
             topics: ['Artificial Intelligence'],
             cadence: ['daily'],
@@ -63,15 +68,11 @@ export async function GET(request: Request) {
           nextRoute = '/onboarding';
         } else {
           // Increment login count for returning users
-          const { error: rpcError } = await supabase.rpc('increment_login_count', { p_user_id: user.id });
-          if (rpcError) {
-            // Fallback if RPC doesn't exist
-            await supabase.from('users').update({ login_count: 1 }).eq('id', user.id);
-          }
+          await adminSupabase.rpc('increment_login_count', { p_user_id: user.id });
         }
 
         // Log login activity
-        await supabase.from('user_activity').insert({
+        await adminSupabase.from('user_activity').insert({
           user_id: user.id,
           action: 'login',
         });
